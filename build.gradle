@@ -16,30 +16,35 @@
  */
 
 plugins {
-    id "java-gradle-plugin"
-    id "maven-publish"
-    id "com.gradle.plugin-publish" version "1.3.1"
+	id "java-gradle-plugin"
+	id "maven-publish"
+	id "com.gradle.plugin-publish" version "1.3.1"
 }
 
 group = "com.icst.blockidle.plugin.builder"
-version = "0.0.0"
+version = "0.0.1"
 
 gradlePlugin {
-    plugins {
-        apkPluginBuilder {
-            id = "com.icst.blockidle.plugin.builder"
-            implementationClass = "com.icst.plugin.builder.ApplyPlugin"
-            displayName = "BlockIdle APK Plugin Builder"
-            description = "Build and configure Android APK plugins for BlockIdle"
-            tags.set(["android", "icst", "blockidle", "apk"])
+	plugins {
+		apkPluginBuilder {
+			id = "com.icst.blockidle.plugin.builder"
+			implementationClass = "com.icst.plugin.builder.ApplyPlugin"
+			displayName = "BlockIdle APK Plugin Builder"
+			description = "Build and configure Android APK plugins for BlockIdle"
+			tags.set([
+				"android",
+				"icst",
+				"blockidle",
+				"apk"
+			])
 
-            website = "https://github.com/Innovative-CST/BlockIDLE"
-            vcsUrl  = "https://github.com/Innovative-CST/BlockIDLE.git"
-        }
-    }
+			website = "https://github.com/Innovative-CST/BlockIDLE"
+			vcsUrl  = "https://github.com/Innovative-CST/BlockIDLE.git"
+		}
+	}
 }
 
 dependencies {
-    compileOnly("com.google.code.gson:gson:2.11.0")
-    compileOnly("com.android.tools.build:gradle:8.10.1")
+	compileOnly("com.google.code.gson:gson:2.11.0")
+	compileOnly("com.android.tools.build:gradle:8.10.1")
 }
