@@ -17,15 +17,16 @@
 
 package com.icst.plugin.builder;
 
+import javax.inject.Inject;
+
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.Property;
 
-import javax.inject.Inject;
-
 public abstract class BlockIdleSdkExtension {
 
-    public abstract Property<String> getPluginName();
+	public abstract Property<String> getPluginName();
 
-    @Inject
-    public BlockIdleSdkExtension(ObjectFactory objects) {}
+	@Inject
+	public BlockIdleSdkExtension(ObjectFactory objects) {
+	}
 }

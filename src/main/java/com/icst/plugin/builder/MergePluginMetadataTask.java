@@ -17,10 +17,11 @@
 
 package com.icst.plugin.builder;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
@@ -29,51 +30,50 @@ import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 public abstract class MergePluginMetadataTask extends DefaultTask {
 
-    @InputDirectory
-    public abstract DirectoryProperty getInputDir();
+	@InputDirectory
+	public abstract DirectoryProperty getInputDir();
 
-    @OutputFile
-    public abstract RegularFileProperty getOutputFile();
+	@OutputFile
+	public abstract RegularFileProperty getOutputFile();
 
-    @TaskAction
-    public void merge() throws Exception {
-        File dir = getInputDir().get().getAsFile();
+	@TaskAction
+	public void merge() throws Exception {
+		File dir = getInputDir().get().getAsFile();
 
-        List<JsonElement> variants = new ArrayList<>();
+		List<JsonElement> variants = new ArrayList<>();
 
-        if (dir.exists()) {
-            collectJsonFiles(dir, variants);
-        }
+		if (dir.exists()) {
+			collectJsonFiles(dir, variants);
+		}
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-        File out = getOutputFile().get().getAsFile();
-        out.getParentFile().mkdirs();
+		File out = getOutputFile().get().getAsFile();
+		out.getParentFile().mkdirs();
 
-        try (FileWriter writer = new FileWriter(out)) {
-            gson.toJson(variants, writer);
-        }
+		try (FileWriter writer = new FileWriter(out)) {
+			gson.toJson(variants, writer);
+		}
 
-        getLogger().lifecycle("Merged plugin metadata → " + out);
-    }
+		getLogger().lifecycle("Merged plugin metadata → " + out);
+	}
 
-    private void collectJsonFiles(File dir, List<JsonElement> out) throws Exception {
-        for (File file : dir.listFiles()) {
-            if (file.isDirectory()) {
-                collectJsonFiles(file, out);
-            } else if (file.getName().equals("apk-metadata.json")) {
-                try (FileReader reader = new FileReader(file)) {
-                    out.add(JsonParser.parseReader(reader));
-                }
-            }
-        }
-    }
+	private void collectJsonFiles(File dir, List<JsonElement> out) throws Exception {
+		for (File file : dir.listFiles()) {
+			if (file.isDirectory()) {
+				collectJsonFiles(file, out);
+			} else if (file.getName().equals("apk-metadata.json")) {
+				try (FileReader reader = new FileReader(file)) {
+					out.add(JsonParser.parseReader(reader));
+				}
+			}
+		}
+	}
 }
