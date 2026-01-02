@@ -34,12 +34,10 @@ import com.android.build.api.artifact.SingleArtifact;
 import com.android.build.api.variant.AndroidComponentsExtension;
 import com.android.build.api.variant.Variant;
 import com.android.build.gradle.AppExtension;
+import org.gradle.api.artifacts.Configuration;
 
 public class ApplyPlugin implements Plugin<Project> {
 
-	private static final String PLUGIN_SDK_URL = "https://github.com/Innovative-CST/blockidle-plugin-api/releases/download/0.0.0/app-plugin-api-release.aar";
-
-	private static final String PLUGIN_SDK_NAME = "plugin-sdk";
 	private static ArrayList<Variant> variants;
 
 	@Override
@@ -47,8 +45,6 @@ public class ApplyPlugin implements Plugin<Project> {
 		variants = new ArrayList<Variant>();
 
 		project.getExtensions().create("blockIdlePlugin", BlockIdleSdkExtension.class);
-
-		BlockIdleSdkExtension ext = project.getExtensions().getByType(BlockIdleSdkExtension.class);
 
 		if (!project.getPlugins().hasPlugin("com.android.application")) {
 			project.getPluginManager().apply("com.android.application");
@@ -58,27 +54,49 @@ public class ApplyPlugin implements Plugin<Project> {
 
 		project.getPluginManager().withPlugin(
 				"com.android.application",
-				p -> configure(project, ext, androidExt));
+				p -> configure(project, androidExt));
 	}
 
-	private void configure(Project project, BlockIdleSdkExtension ext, AppExtension androidExt) {
-		project.afterEvaluate(p -> {
-			if (!ext.getPluginName().isPresent()) {
-				throw new GradleException("Please provide a plugin name");
-			}
-		});
+	private void configure(Project project, AppExtension androidExt) {
+        BlockIdleSdkExtension ext = project.getExtensions().getByType(BlockIdleSdkExtension.class);
+        
+        Configuration sdkCfg = project.getConfigurations().maybeCreate("blockIdlePluginSdk");
+        sdkCfg.setCanBeResolved(true);
+        sdkCfg.setCanBeConsumed(false);
+
+        project.afterEvaluate(t -> {
+            if (!ext.getPluginName().isPresent()) {
+    			throw new GradleException("Please provide a plugin name");
+    		}
+            if (!ext.getSdkVersion().isPresent()) {
+    			throw new GradleException("Please provide sdk version for building plugin for BlockIDLE");
+    		}
+            
+            String sdkVersion = ext.getSdkVersion().get();
+
+            project.getDependencies().add(
+                "blockIdlePluginSdk",
+                "io.github.devvigilante:blockidle-plugin-sdk:" + sdkVersion
+            );
+        
+            project.getDependencies().add(
+                "compileOnly",
+                "io.github.devvigilante:blockidle-plugin-sdk:" + sdkVersion
+            );
+        });
 
 		project.getTasks().register("buildPlugin", task -> {
 			task.setGroup("block-idle");
-			task.setDescription("Build all debug plugin variants and generate single metadata");
+			task.setDescription("Build all debug plugin variants and generates ready to publish plugin");
 		});
 
 		project.getTasks().register("mergePluginMetadata", MergePluginMetadataTask.class, t -> {
 			t.getInputDir().set(
-					project.getLayout().getBuildDirectory().dir("plugin-metadata/tmp"));
+				project.getLayout().getBuildDirectory().dir("outputs/plugin")
+            );
 			t.getOutputFile().set(
-					project.getLayout().getBuildDirectory().file(
-							"plugin-metadata/all-plugins.json"));
+				project.getLayout().getBuildDirectory().file("outputs/plugin/plugin-metadata.json")
+            );
 		});
 		project.getTasks().named("buildPlugin").configure(t -> t.dependsOn("mergePluginMetadata"));
 
@@ -117,47 +135,21 @@ public class ApplyPlugin implements Plugin<Project> {
 				variant.getProductFlavors().forEach(pf -> flavors.put(pf.getSecond(), pf.getFirst()));
 
 				task.getProductFlavors().set(flavors);
-				task.getMinSdk().set(minSdk);
-				task.getTargetSdk().set(targetSdk);
+				task.getMinSdk().set(ext.getMinSdkVersion());
+                task.getAppMinSdk().set(minSdk);
+				task.getAppTargetSdk().set(targetSdk);
 				task.getMetadataFile().set(
 						project.getLayout().getBuildDirectory().file(
-								"plugin-metadata/tmp/" + variant.getName() + "/apk-metadata.json"));
+								"outputs/plugin/" + variant.getName() + "/plugin-metadata.json"));
+                task.getPluginOutputDir().set(
+						project.getLayout().getBuildDirectory().file(
+								"outputs/plugin/" + variant.getName()));
 			});
 			project.getTasks().named("mergePluginMetadata").configure(t -> t.dependsOn(taskName));
 		});
-
-		downloadAndAttachSdk(project);
 	}
 
 	private String capitalize(String str) {
 		return str.substring(0, 1).toUpperCase() + str.substring(1);
-	}
-
-	private void downloadAndAttachSdk(Project project) {
-
-		File sdkDir = new File(project.getBuildDir(), "plugin-sdk");
-		File sdkAar = new File(sdkDir, PLUGIN_SDK_NAME + ".aar");
-
-		if (sdkAar.exists()) {
-			project.getDependencies().add("compileOnly", project.files(sdkAar));
-			return;
-		}
-
-		sdkDir.mkdirs();
-
-		try (InputStream in = new URL(PLUGIN_SDK_URL).openStream();
-				OutputStream out = Files.newOutputStream(sdkAar.toPath())) {
-
-			byte[] buffer = new byte[8192];
-			int read;
-			while ((read = in.read(buffer)) != -1) {
-				out.write(buffer, 0, read);
-			}
-
-		} catch (Exception e) {
-			throw new GradleException("Plugin SDK download failed", e);
-		}
-
-		project.getDependencies().add("compileOnly", project.files(sdkAar));
 	}
 }

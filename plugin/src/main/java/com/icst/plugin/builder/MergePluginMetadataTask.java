@@ -61,15 +61,13 @@ public abstract class MergePluginMetadataTask extends DefaultTask {
 		try (FileWriter writer = new FileWriter(out)) {
 			gson.toJson(variants, writer);
 		}
-
-		getLogger().lifecycle("Merged plugin metadata → " + out);
 	}
 
 	private void collectJsonFiles(File dir, List<JsonElement> out) throws Exception {
 		for (File file : dir.listFiles()) {
 			if (file.isDirectory()) {
 				collectJsonFiles(file, out);
-			} else if (file.getName().equals("apk-metadata.json")) {
+			} else if (file.getName().equals("plugin-metadata.json")) {
 				try (FileReader reader = new FileReader(file)) {
 					out.add(JsonParser.parseReader(reader));
 				}
