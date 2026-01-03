@@ -25,11 +25,12 @@ import org.gradle.api.provider.Property;
 public abstract class BlockIdleSdkExtension {
 
 	public abstract Property<String> getPluginName();
-    
-    public abstract Property<String> getSdkVersion();
-    
-    public abstract Property<String> getMinSdkVersion();
+
+	public abstract Property<String> getSdkVersion();
+
+	public abstract Property<String> getMinSdkVersion();
 
 	@Inject
-	public BlockIdleSdkExtension(ObjectFactory objects) {}
+	public BlockIdleSdkExtension(ObjectFactory objects) {
+	}
 }

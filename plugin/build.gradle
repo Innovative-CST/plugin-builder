@@ -21,15 +21,14 @@ plugins {
 }
 
 mavenPublishing {
-    publishToMavenCentral()
-    signAllPublications()
+	publishToMavenCentral()
+	signAllPublications()
 }
 
 signing {
-    useInMemoryPgpKeys(
-        findProperty("signingInMemoryKey"),
-        findProperty("signingInMemoryKeyPassword")
-    )
+	String key = findProperty("signingInMemoryKey")
+	String password = findProperty("signingInMemoryKeyPassword")
+	useInMemoryPgpKeys(key, password)
 }
 
 group = "io.github.devvigilante"
@@ -61,9 +60,9 @@ dependencies {
 }
 
 mavenPublishing {
-  coordinates(group, "blockidle-gradle-plugin-builder", version)
-  
-  pom {
+	coordinates(group, "blockidle-gradle-plugin-builder", version)
+
+	pom {
 		name.set("BlockIDLE Gradle Plugin Builder")
 		description.set("Plugin for developing BlockIDLE plugins")
 		url.set("https://github.com/Innovative-CST/BlockIDLE")
@@ -88,5 +87,5 @@ mavenPublishing {
 			connection.set("scm:git:https://github.com/Innovative-CST/BlockIDLE.git")
 			developerConnection.set("scm:git:ssh://git@github.com/Innovative-CST/BlockIDLE.git")
 		}
-    }
+	}
 }

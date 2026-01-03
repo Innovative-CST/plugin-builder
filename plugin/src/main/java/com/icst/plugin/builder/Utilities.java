@@ -17,7 +17,6 @@
 
 package com.icst.plugin.builder;
 
-import com.google.gson.Gson;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStream;
@@ -27,62 +26,61 @@ import java.nio.file.StandardCopyOption;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.gradle.api.attributes.Attribute;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.attributes.Attribute;
+
+import com.google.gson.Gson;
 
 public final class Utilities {
-    protected static SdkMetadata readSdkMetadata(File json) {
-        try (Reader r = new FileReader(json)) {
-            return new Gson().fromJson(r, SdkMetadata.class);
-        } catch (Exception e) {
-            throw new GradleException("Invalid SDK metadata", e);
-        }
-    }
-        
-    protected static File extractSdkMetadata(Project project) {
-        Configuration cfg = project.getConfigurations().getByName("blockIdlePluginSdk");
-        
-        File aar = cfg.getIncoming()
-            .artifactView(view -> {
-                view.attributes(attrs ->
-                    attrs.attribute(
-                        Attribute.of("artifactType", String.class),
-                        "aar"
-                    )
-                );
-            })
-            .getArtifacts()
-            .getArtifactFiles()
-            .getSingleFile();
-        if (!aar.getName().endsWith(".aar")) {
-            throw new GradleException("Resolved SDK is not an AAR: " + aar);
-        }
+	protected static SdkMetadata readSdkMetadata(File json) {
+		try (Reader r = new FileReader(json)) {
+			return new Gson().fromJson(r, SdkMetadata.class);
+		} catch (Exception e) {
+			throw new GradleException("Invalid SDK metadata", e);
+		}
+	}
 
-        File outDir = new File(project.getBuildDir(), "plugin-sdk-metadata");
-        outDir.mkdirs();
-    
-        try (ZipFile zip = new ZipFile(aar)) {
-            ZipEntry classesJarEntry = zip.getEntry("classes.jar");
-            File classesJar = new File(outDir, "classes.jar");
-    
-            try (InputStream in = zip.getInputStream(classesJarEntry)) {
-                Files.copy(in, classesJar.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            }
-    
-            try (ZipFile classesZip = new ZipFile(classesJar)) {
-                ZipEntry metadata = classesZip.getEntry("META-INF/sdk-metadata.json");
-                File metadataOut = new File(outDir, "sdk-metadata.json");
-    
-                try (InputStream in = classesZip.getInputStream(metadata)) {
-                    Files.copy(in, metadataOut.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                }
-    
-                return metadataOut;
-            }
-        } catch (Exception e) {
-            throw new GradleException("Failed to extract SDK metadata", e);
-        }
-    }
+	protected static File extractSdkMetadata(Project project) {
+		Configuration cfg = project.getConfigurations().getByName("blockIdlePluginSdk");
+
+		File aar = cfg.getIncoming()
+				.artifactView(view -> {
+					view.attributes(attrs -> attrs.attribute(
+							Attribute.of("artifactType", String.class),
+							"aar"));
+				})
+				.getArtifacts()
+				.getArtifactFiles()
+				.getSingleFile();
+		if (!aar.getName().endsWith(".aar")) {
+			throw new GradleException("Resolved SDK is not an AAR: " + aar);
+		}
+
+		File outDir = new File(project.getBuildDir(), "plugin-sdk-metadata");
+		outDir.mkdirs();
+
+		try (ZipFile zip = new ZipFile(aar)) {
+			ZipEntry classesJarEntry = zip.getEntry("classes.jar");
+			File classesJar = new File(outDir, "classes.jar");
+
+			try (InputStream in = zip.getInputStream(classesJarEntry)) {
+				Files.copy(in, classesJar.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			}
+
+			try (ZipFile classesZip = new ZipFile(classesJar)) {
+				ZipEntry metadata = classesZip.getEntry("META-INF/sdk-metadata.json");
+				File metadataOut = new File(outDir, "sdk-metadata.json");
+
+				try (InputStream in = classesZip.getInputStream(metadata)) {
+					Files.copy(in, metadataOut.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				}
+
+				return metadataOut;
+			}
+		} catch (Exception e) {
+			throw new GradleException("Failed to extract SDK metadata", e);
+		}
+	}
 }

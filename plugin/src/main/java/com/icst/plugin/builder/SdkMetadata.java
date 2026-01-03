@@ -19,14 +19,14 @@ package com.icst.plugin.builder;
 
 public class SdkMetadata {
 
-    public String version;
-    public String minSdkSupported;
+	public String version;
+	public String minSdkSupported;
 
-    public int versionNumber;
-    public String versionType;
-    public int subVersion;
-    public String versionName;
+	public int versionNumber;
+	public String versionType;
+	public int subVersion;
+	public String versionName;
 
-    public int minApiLevel;
-    public int javaVersion;
+	public int minApiLevel;
+	public int javaVersion;
 }

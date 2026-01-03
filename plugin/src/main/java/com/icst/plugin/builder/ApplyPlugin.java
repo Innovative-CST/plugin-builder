@@ -17,11 +17,6 @@
 
 package com.icst.plugin.builder;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,12 +24,12 @@ import java.util.Map;
 import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
 
 import com.android.build.api.artifact.SingleArtifact;
 import com.android.build.api.variant.AndroidComponentsExtension;
 import com.android.build.api.variant.Variant;
 import com.android.build.gradle.AppExtension;
-import org.gradle.api.artifacts.Configuration;
 
 public class ApplyPlugin implements Plugin<Project> {
 
@@ -58,32 +53,30 @@ public class ApplyPlugin implements Plugin<Project> {
 	}
 
 	private void configure(Project project, AppExtension androidExt) {
-        BlockIdleSdkExtension ext = project.getExtensions().getByType(BlockIdleSdkExtension.class);
-        
-        Configuration sdkCfg = project.getConfigurations().maybeCreate("blockIdlePluginSdk");
-        sdkCfg.setCanBeResolved(true);
-        sdkCfg.setCanBeConsumed(false);
+		BlockIdleSdkExtension ext = project.getExtensions().getByType(BlockIdleSdkExtension.class);
 
-        project.afterEvaluate(t -> {
-            if (!ext.getPluginName().isPresent()) {
-    			throw new GradleException("Please provide a plugin name");
-    		}
-            if (!ext.getSdkVersion().isPresent()) {
-    			throw new GradleException("Please provide sdk version for building plugin for BlockIDLE");
-    		}
-            
-            String sdkVersion = ext.getSdkVersion().get();
+		Configuration sdkCfg = project.getConfigurations().maybeCreate("blockIdlePluginSdk");
+		sdkCfg.setCanBeResolved(true);
+		sdkCfg.setCanBeConsumed(false);
 
-            project.getDependencies().add(
-                "blockIdlePluginSdk",
-                "io.github.devvigilante:blockidle-plugin-sdk:" + sdkVersion
-            );
-        
-            project.getDependencies().add(
-                "compileOnly",
-                "io.github.devvigilante:blockidle-plugin-sdk:" + sdkVersion
-            );
-        });
+		project.afterEvaluate(t -> {
+			if (!ext.getPluginName().isPresent()) {
+				throw new GradleException("Please provide a plugin name");
+			}
+			if (!ext.getSdkVersion().isPresent()) {
+				throw new GradleException("Please provide sdk version for building plugin for BlockIDLE");
+			}
+
+			String sdkVersion = ext.getSdkVersion().get();
+
+			project.getDependencies().add(
+					"blockIdlePluginSdk",
+					"io.github.devvigilante:blockidle-plugin-sdk:" + sdkVersion);
+
+			project.getDependencies().add(
+					"compileOnly",
+					"io.github.devvigilante:blockidle-plugin-sdk:" + sdkVersion);
+		});
 
 		project.getTasks().register("buildPlugin", task -> {
 			task.setGroup("block-idle");
@@ -92,11 +85,9 @@ public class ApplyPlugin implements Plugin<Project> {
 
 		project.getTasks().register("mergePluginMetadata", MergePluginMetadataTask.class, t -> {
 			t.getInputDir().set(
-				project.getLayout().getBuildDirectory().dir("outputs/plugin")
-            );
+					project.getLayout().getBuildDirectory().dir("outputs/plugin"));
 			t.getOutputFile().set(
-				project.getLayout().getBuildDirectory().file("outputs/plugin/plugin-metadata.json")
-            );
+					project.getLayout().getBuildDirectory().file("outputs/plugin/plugin-metadata.json"));
 		});
 		project.getTasks().named("buildPlugin").configure(t -> t.dependsOn("mergePluginMetadata"));
 
@@ -136,12 +127,12 @@ public class ApplyPlugin implements Plugin<Project> {
 
 				task.getProductFlavors().set(flavors);
 				task.getMinSdk().set(ext.getMinSdkVersion());
-                task.getAppMinSdk().set(minSdk);
+				task.getAppMinSdk().set(minSdk);
 				task.getAppTargetSdk().set(targetSdk);
 				task.getMetadataFile().set(
 						project.getLayout().getBuildDirectory().file(
 								"outputs/plugin/" + variant.getName() + "/plugin-metadata.json"));
-                task.getPluginOutputDir().set(
+				task.getPluginOutputDir().set(
 						project.getLayout().getBuildDirectory().file(
 								"outputs/plugin/" + variant.getName()));
 			});

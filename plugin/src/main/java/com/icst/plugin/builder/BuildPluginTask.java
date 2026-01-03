@@ -22,8 +22,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.file.Files;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -70,14 +70,14 @@ public abstract class BuildPluginTask extends DefaultTask {
 
 	@Input
 	public abstract Property<Integer> getAppTargetSdk();
-    
-    @Input
+
+	@Input
 	public abstract Property<Integer> getAppMinSdk();
 
 	@OutputFile
 	public abstract RegularFileProperty getMetadataFile();
-    
-    @OutputDirectory
+
+	@OutputDirectory
 	public abstract RegularFileProperty getPluginOutputDir();
 
 	@TaskAction
@@ -93,52 +93,51 @@ public abstract class BuildPluginTask extends DefaultTask {
 		getLogger().lifecycle("Flavors      : " + getProductFlavors().get());
 		getLogger().lifecycle("minSdk       : " + getMinSdk().get());
 		getLogger().lifecycle("targetSdk    : " + getAppTargetSdk().get());
-        
-        BlockIdleSdkExtension ext = getProject().getExtensions().getByType(BlockIdleSdkExtension.class);
+
+		BlockIdleSdkExtension ext = getProject().getExtensions().getByType(BlockIdleSdkExtension.class);
 
 		Map<String, Object> root = new LinkedHashMap<>();
-        
-        root.put("pluginName", ext.getPluginName().get());
+
+		root.put("pluginName", ext.getPluginName().get());
 		root.put("variant", getVariantName().get());
 		root.put("buildType", getBuildType().get());
 		root.put("flavors", getProductFlavors().get());
 		root.put("appMinSdk", getAppMinSdk().get());
 		root.put("appTargetSdk", getAppTargetSdk().get());
-        
-        File sdkMetadataFile = Utilities.extractSdkMetadata(getProject());
-        SdkMetadata sdkMetadata = Utilities.readSdkMetadata(sdkMetadataFile);
-        
-        root.put("minSdk", ext.getMinSdkVersion().get());
-        root.put("minSdkSupported", sdkMetadata.minSdkSupported);
-        root.put("sdkVersion", sdkMetadata.version);
-        root.put("sdkVersionNumber", sdkMetadata.versionNumber);
-        root.put("sdkSubVersionType", sdkMetadata.versionType);
-        root.put("sdkSubVersionNumber", sdkMetadata.subVersion);
-        root.put("sdkVersionName", sdkMetadata.versionName);
+
+		File sdkMetadataFile = Utilities.extractSdkMetadata(getProject());
+		SdkMetadata sdkMetadata = Utilities.readSdkMetadata(sdkMetadataFile);
+
+		root.put("minSdk", ext.getMinSdkVersion().get());
+		root.put("minSdkSupported", sdkMetadata.minSdkSupported);
+		root.put("sdkVersion", sdkMetadata.version);
+		root.put("sdkVersionNumber", sdkMetadata.versionNumber);
+		root.put("sdkSubVersionType", sdkMetadata.versionType);
+		root.put("sdkSubVersionNumber", sdkMetadata.subVersion);
+		root.put("sdkVersionName", sdkMetadata.versionName);
 
 		List<Map<String, Object>> outputs = new ArrayList<>();
 
 		builtArtifacts.getElements().forEach(artifact -> {
-            try {
-                File sourceApk = new File(artifact.getOutputFile());
-                File targetApk = new File(getPluginOutputDir().get().getAsFile(), sourceApk.getName());
-        
-                Files.copy(
-                    sourceApk.toPath(),
-                    targetApk.toPath(),
-                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
-                );
-        
-                Map<String, Object> apk = new LinkedHashMap<>();
-                apk.put("apkPath", targetApk.getName()); // RELATIVE PATH ✔
-                apk.put("versionName", artifact.getVersionName());
-                apk.put("filters", artifact.getFilters());
-        
-                outputs.add(apk);
-        
-            } catch (IOException e) {
-                throw new GradleException("Failed to copy APK", e);
-            }
+			try {
+				File sourceApk = new File(artifact.getOutputFile());
+				File targetApk = new File(getPluginOutputDir().get().getAsFile(), sourceApk.getName());
+
+				Files.copy(
+						sourceApk.toPath(),
+						targetApk.toPath(),
+						java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+				Map<String, Object> apk = new LinkedHashMap<>();
+				apk.put("apkPath", targetApk.getName()); // RELATIVE PATH ✔
+				apk.put("versionName", artifact.getVersionName());
+				apk.put("filters", artifact.getFilters());
+
+				outputs.add(apk);
+
+			} catch (IOException e) {
+				throw new GradleException("Failed to copy APK", e);
+			}
 		});
 
 		root.put("outputs", outputs);
