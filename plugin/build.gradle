@@ -17,17 +17,28 @@
 
 plugins {
 	id "java-gradle-plugin"
-	id "maven-publish"
-	id "com.gradle.plugin-publish" version "1.3.1"
+	id "com.vanniktech.maven.publish" version "0.34.0"
 }
 
-group = "com.icst.blockidle.plugin.builder"
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
+}
+
+signing {
+    useInMemoryPgpKeys(
+        findProperty("signingInMemoryKey"),
+        findProperty("signingInMemoryKeyPassword")
+    )
+}
+
+group = "io.github.devvigilante"
 version = "0.0.1"
 
 gradlePlugin {
 	plugins {
 		apkPluginBuilder {
-			id = "com.icst.blockidle.plugin.builder"
+			id = "io.github.devvigilante.blockidle.plugin-builder"
 			implementationClass = "com.icst.plugin.builder.ApplyPlugin"
 			displayName = "BlockIdle APK Plugin Builder"
 			description = "Build and configure Android APK plugins for BlockIdle"
@@ -47,4 +58,35 @@ gradlePlugin {
 dependencies {
 	compileOnly("com.google.code.gson:gson:2.11.0")
 	compileOnly("com.android.tools.build:gradle:8.10.1")
+}
+
+mavenPublishing {
+  coordinates(group, "blockidle-gradle-plugin-builder", version)
+  
+  pom {
+		name.set("BlockIDLE Gradle Plugin Builder")
+		description.set("Plugin for developing BlockIDLE plugins")
+		url.set("https://github.com/Innovative-CST/BlockIDLE")
+
+		licenses {
+			license {
+				name.set("GNU General Public License v3.0")
+				url.set("https://www.gnu.org/licenses/gpl-3.0.html")
+			}
+		}
+
+		developers {
+			developer {
+				id.set("DevVigilante")
+				name.set("Dev Kumar")
+				url.set("https://github.com/DevVigilante")
+			}
+		}
+
+		scm {
+			url.set("https://github.com/Innovative-CST/BlockIDLE")
+			connection.set("scm:git:https://github.com/Innovative-CST/BlockIDLE.git")
+			developerConnection.set("scm:git:ssh://git@github.com/Innovative-CST/BlockIDLE.git")
+		}
+    }
 }
