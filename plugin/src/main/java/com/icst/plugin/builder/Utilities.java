@@ -34,6 +34,10 @@ import org.gradle.api.attributes.Attribute;
 import com.google.gson.Gson;
 
 public final class Utilities {
+	public static String capitalize(String str) {
+		return str.substring(0, 1).toUpperCase() + str.substring(1);
+	}
+
 	protected static SdkMetadata readSdkMetadata(File json) {
 		try (Reader r = new FileReader(json)) {
 			return new Gson().fromJson(r, SdkMetadata.class);

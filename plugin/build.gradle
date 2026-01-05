@@ -38,7 +38,7 @@ gradlePlugin {
 	plugins {
 		apkPluginBuilder {
 			id = "io.github.devvigilante.blockidle.plugin-builder"
-			implementationClass = "com.icst.plugin.builder.ApplyPlugin"
+			implementationClass = "com.icst.plugin.builder.BlockIdlePlugin"
 			displayName = "BlockIdle APK Plugin Builder"
 			description = "Build and configure Android APK plugins for BlockIdle"
 			tags.set([

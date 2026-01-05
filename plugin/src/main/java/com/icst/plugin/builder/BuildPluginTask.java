@@ -24,6 +24,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -88,12 +89,6 @@ public abstract class BuildPluginTask extends DefaultTask {
 			throw new RuntimeException("No APKs found!");
 		}
 
-		getLogger().lifecycle("Variant      : " + getVariantName().get());
-		getLogger().lifecycle("BuildType    : " + getBuildType().get());
-		getLogger().lifecycle("Flavors      : " + getProductFlavors().get());
-		getLogger().lifecycle("minSdk       : " + getMinSdk().get());
-		getLogger().lifecycle("targetSdk    : " + getAppTargetSdk().get());
-
 		BlockIdleSdkExtension ext = getProject().getExtensions().getByType(BlockIdleSdkExtension.class);
 
 		Map<String, Object> root = new LinkedHashMap<>();
@@ -126,7 +121,7 @@ public abstract class BuildPluginTask extends DefaultTask {
 				Files.copy(
 						sourceApk.toPath(),
 						targetApk.toPath(),
-						java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+						StandardCopyOption.REPLACE_EXISTING);
 
 				Map<String, Object> apk = new LinkedHashMap<>();
 				apk.put("apkPath", targetApk.getName()); // RELATIVE PATH ✔
