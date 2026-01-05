@@ -45,6 +45,7 @@ import org.gradle.api.tasks.TaskAction;
 
 import com.android.build.api.variant.BuiltArtifacts;
 import com.android.build.api.variant.BuiltArtifactsLoader;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public abstract class BuildPluginTask extends DefaultTask {
@@ -90,26 +91,24 @@ public abstract class BuildPluginTask extends DefaultTask {
 		}
 
 		BlockIdleSdkExtension ext = getProject().getExtensions().getByType(BlockIdleSdkExtension.class);
+		File sdkMetadataFile = Utilities.extractSdkMetadata(getProject());
+		SdkMetadata sdkMetadata = Utilities.readSdkMetadata(sdkMetadataFile);
 
 		Map<String, Object> root = new LinkedHashMap<>();
 
 		root.put("pluginName", ext.getPluginName().get());
+
+		Gson gson = new Gson();
+		@SuppressWarnings("unchecked")
+		Map<String, Object> sdkMap = gson.fromJson(gson.toJson(sdkMetadata), Map.class);
+		sdkMap.put("minSdk", ext.getMinSdkVersion().get());
+
+		root.put("sdk", sdkMap);
 		root.put("variant", getVariantName().get());
 		root.put("buildType", getBuildType().get());
 		root.put("flavors", getProductFlavors().get());
 		root.put("appMinSdk", getAppMinSdk().get());
 		root.put("appTargetSdk", getAppTargetSdk().get());
-
-		File sdkMetadataFile = Utilities.extractSdkMetadata(getProject());
-		SdkMetadata sdkMetadata = Utilities.readSdkMetadata(sdkMetadataFile);
-
-		root.put("minSdk", ext.getMinSdkVersion().get());
-		root.put("minSdkSupported", sdkMetadata.minSdkSupported);
-		root.put("sdkVersion", sdkMetadata.version);
-		root.put("sdkVersionNumber", sdkMetadata.versionNumber);
-		root.put("sdkSubVersionType", sdkMetadata.versionType);
-		root.put("sdkSubVersionNumber", sdkMetadata.subVersion);
-		root.put("sdkVersionName", sdkMetadata.versionName);
 
 		List<Map<String, Object>> outputs = new ArrayList<>();
 
