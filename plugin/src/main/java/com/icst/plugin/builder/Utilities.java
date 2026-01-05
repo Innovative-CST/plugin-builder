@@ -62,7 +62,7 @@ public final class Utilities {
 			throw new GradleException("Resolved SDK is not an AAR: " + aar);
 		}
 
-		File outDir = new File(project.getBuildDir(), "plugin-sdk-metadata");
+		File outDir = new File(project.getLayout().getBuildDirectory().getAsFile().get(), "plugin-sdk-metadata");
 		outDir.mkdirs();
 
 		try (ZipFile zip = new ZipFile(aar)) {
