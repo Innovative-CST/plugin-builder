@@ -30,6 +30,8 @@ public abstract class BlockIdleSdkExtension {
 
 	public abstract Property<String> getMinSdkVersion();
 
+	public abstract Property<String> getAppPluginClass();
+
 	@Inject
 	public BlockIdleSdkExtension(ObjectFactory objects) {
 	}
