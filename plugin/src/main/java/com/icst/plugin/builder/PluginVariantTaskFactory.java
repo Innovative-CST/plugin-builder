@@ -26,6 +26,7 @@ import org.gradle.api.file.RegularFile;
 import org.gradle.api.provider.Provider;
 
 import com.android.build.api.artifact.SingleArtifact;
+import com.android.build.api.variant.ApplicationVariant;
 import com.android.build.api.variant.Variant;
 
 public class PluginVariantTaskFactory {
@@ -80,5 +81,6 @@ public class PluginVariantTaskFactory {
 		task.getAppTargetSdk().set(targetSdk);
 		task.getMetadataFile().set(metadataFile);
 		task.getPluginOutputDir().set(apkOutputDir);
+		task.getApplicationId().set(((ApplicationVariant) variant).getApplicationId());
 	}
 }
