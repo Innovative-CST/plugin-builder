@@ -17,6 +17,8 @@
 
 package com.icst.plugin.builder;
 
+import java.util.regex.Pattern;
+
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
@@ -40,6 +42,12 @@ public class PluginExtensionConfigurator {
 				throw new GradleException("Please provide sdk version for building plugin for BlockIDLE");
 			}
 
+			if (!ext.getAppPluginClass().isPresent()) {
+				throw new GradleException("Please provide appPluginClass as entry point of plugin for BlockIDLE");
+			}
+
+			validateFqcn(ext.getAppPluginClass().get(), "appPluginClass");
+
 			String sdkVersion = ext.getSdkVersion().get();
 
 			project.getDependencies().add(
@@ -50,6 +58,21 @@ public class PluginExtensionConfigurator {
 					"compileOnly",
 					"io.github.devvigilante:blockidle-plugin-sdk:" + sdkVersion);
 		});
+	}
+
+	private static final Pattern FQCN_PATTERN = Pattern.compile(
+			"^[a-zA-Z_$][a-zA-Z\\d_$]*(\\.[a-zA-Z_$][a-zA-Z\\d_$]*)+$");
+
+	private static void validateFqcn(String value, String propertyName) {
+		if (value == null || value.isEmpty()) {
+			throw new GradleException(propertyName + " must not be empty");
+		}
+
+		if (!FQCN_PATTERN.matcher(value).matches()) {
+			throw new GradleException(
+					propertyName + " must be a fully qualified class name. " +
+							"Example: com.example.MyPlugin");
+		}
 	}
 
 }
