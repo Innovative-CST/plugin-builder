@@ -62,6 +62,9 @@ public abstract class BuildPluginTask extends DefaultTask {
 	public abstract Property<String> getVariantName();
 
 	@Input
+	public abstract Property<String> getVersionName();
+
+	@Input
 	public abstract Property<String> getBuildType();
 
 	@Input
@@ -102,6 +105,7 @@ public abstract class BuildPluginTask extends DefaultTask {
 		root.put("pluginName", ext.getPluginName().get());
 		root.put("appPluginClass", ext.getAppPluginClass().get());
 		root.put("applicationId", getApplicationId().get());
+		root.put("versionName", getVersionName());
 
 		Gson gson = new Gson();
 		@SuppressWarnings("unchecked")
@@ -129,7 +133,6 @@ public abstract class BuildPluginTask extends DefaultTask {
 
 				Map<String, Object> apk = new LinkedHashMap<>();
 				apk.put("apkPath", targetApk.getName()); // RELATIVE PATH ✔
-				apk.put("versionName", artifact.getVersionName());
 				apk.put("filters", artifact.getFilters());
 
 				outputs.add(apk);

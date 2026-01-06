@@ -35,15 +35,29 @@ public class PluginExtensionConfigurator {
 		sdkCfg.setCanBeConsumed(false);
 
 		project.afterEvaluate(t -> {
+			StringBuilder error = new StringBuilder("We got following error in your plugin:\n");
+			boolean containsError = false;
 			if (!ext.getPluginName().isPresent()) {
-				throw new GradleException("Please provide a plugin name");
+				containsError = true;
+				error.append("> Please provide a plugin name\n");
 			}
 			if (!ext.getSdkVersion().isPresent()) {
-				throw new GradleException("Please provide sdk version for building plugin for BlockIDLE");
+				containsError = true;
+				error.append("> Please provide sdk version for building plugin for BlockIDLE\n");
 			}
 
 			if (!ext.getAppPluginClass().isPresent()) {
-				throw new GradleException("Please provide appPluginClass as entry point of plugin for BlockIDLE");
+				containsError = true;
+				error.append("> Please provide appPluginClass as entry point of plugin for BlockIDLE\n");
+			}
+
+			if (!ext.getVersionName().isPresent()) {
+				containsError = true;
+				error.append("> Please provide versionName of plugin as entry point of plugin for BlockIDLE\n");
+			}
+
+			if (containsError) {
+				throw new GradleException(error.toString());
 			}
 
 			validateFqcn(ext.getAppPluginClass().get(), "appPluginClass");

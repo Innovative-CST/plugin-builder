@@ -70,6 +70,7 @@ public class PluginVariantTaskFactory {
 
 		// Variant metadata
 		task.getVariantName().set(variant.getName());
+		task.getVersionName().set(ext.getVersionName());
 		task.getBuildType().set(variant.getBuildType());
 
 		Map<String, String> flavors = new HashMap<>();
