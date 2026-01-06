@@ -76,6 +76,9 @@ public abstract class BuildPluginTask extends DefaultTask {
 	@Input
 	public abstract Property<Integer> getAppMinSdk();
 
+	@Input
+	public abstract Property<String> getApplicationId();
+
 	@OutputFile
 	public abstract RegularFileProperty getMetadataFile();
 
@@ -97,6 +100,8 @@ public abstract class BuildPluginTask extends DefaultTask {
 		Map<String, Object> root = new LinkedHashMap<>();
 
 		root.put("pluginName", ext.getPluginName().get());
+		root.put("appPluginClass", ext.getAppPluginClass().get());
+		root.put("applicationId", getApplicationId().get());
 
 		Gson gson = new Gson();
 		@SuppressWarnings("unchecked")
