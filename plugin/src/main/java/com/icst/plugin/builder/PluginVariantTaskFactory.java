@@ -24,6 +24,7 @@ import org.gradle.api.Project;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.tasks.Delete;
 
 import com.android.build.api.artifact.SingleArtifact;
 import com.android.build.api.variant.ApplicationVariant;
@@ -35,10 +36,21 @@ public class PluginVariantTaskFactory {
 	private static final String PLUGIN_METADATA_FILE = "plugin-metadata.json";
 
 	public static void create(Project project, Variant variant) {
-		String taskName = "buildPlugin" + Utilities.capitalize(variant.getName());
+		String buildTaskName = "buildPlugin" + Utilities.capitalize(variant.getName());
 
-		project.getTasks().register(taskName, BuildPluginTask.class, task -> {
+		project.getTasks().register(buildTaskName, BuildPluginTask.class, task -> {
 			registerBuildTaskForVariant(project, variant, task);
+		});
+
+		String cleanTaskName = "cleanPlugin" + Utilities.capitalize(variant.getName());
+
+		project.getTasks().register(cleanTaskName, Delete.class, t -> {
+			DirectoryProperty buildDir = project.getLayout().getBuildDirectory();
+			StringBuilder apkOutputDirPath = new StringBuilder(PLUGIN_OUTPUT_DIR);
+			apkOutputDirPath.append("/");
+			apkOutputDirPath.append(variant.getName());
+
+			t.delete(buildDir.dir(apkOutputDirPath.toString()));
 		});
 	}
 

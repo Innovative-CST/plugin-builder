@@ -19,22 +19,28 @@ package com.icst.plugin.builder;
 
 import org.gradle.api.Project;
 import org.gradle.api.file.DirectoryProperty;
+import org.gradle.api.tasks.Delete;
 
 public class PluginTaskRegistrar {
 
 	public static void register(Project project) {
-		project.getTasks().register("buildPlugin", task -> {
-			task.setGroup("block-idle");
-			task.setDescription("Build all debug plugin variants and generates ready to publish plugin");
-		});
-
 		DirectoryProperty buildDir = project.getLayout().getBuildDirectory();
+
+		project.getTasks().register("cleanPluginOutputs", Delete.class, t -> {
+			t.delete(buildDir.dir("outputs/plugin"));
+		});
 
 		project.getTasks().register("mergePluginMetadata", MergePluginMetadataTask.class, t -> {
 			t.getInputDir().set(buildDir.dir("outputs/plugin"));
 			t.getOutputFile().set(buildDir.file("outputs/plugin/plugin-metadata.json"));
+			t.dependsOn("cleanPluginOutputs");
+			t.mustRunAfter("cleanPluginOutputs");
 		});
-		project.getTasks().named("buildPlugin").configure(t -> t.dependsOn("mergePluginMetadata"));
-	}
 
+		project.getTasks().register("buildPlugin", task -> {
+			task.setGroup("block-idle");
+			task.setDescription("Build all debug plugin variants and generates ready to publish plugin");
+			task.dependsOn("mergePluginMetadata");
+		});
+	}
 }

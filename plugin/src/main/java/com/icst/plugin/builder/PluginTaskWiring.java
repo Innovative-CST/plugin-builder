@@ -25,7 +25,12 @@ public class PluginTaskWiring {
 
 	public static void wire(Project project, Variant variant) {
 		String taskName = "buildPlugin" + Utilities.capitalize(variant.getName());
+		String cleanTaskName = "cleanPlugin" + Utilities.capitalize(variant.getName());
 		project.getTasks().named("mergePluginMetadata").configure(t -> t.dependsOn(taskName));
+		project.getTasks().named(taskName).configure(t -> {
+			t.dependsOn(cleanTaskName);
+			t.mustRunAfter(cleanTaskName);
+		});
 	}
 
 }
