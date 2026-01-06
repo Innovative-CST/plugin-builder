@@ -105,7 +105,7 @@ public abstract class BuildPluginTask extends DefaultTask {
 		root.put("pluginName", ext.getPluginName().get());
 		root.put("appPluginClass", ext.getAppPluginClass().get());
 		root.put("applicationId", getApplicationId().get());
-		root.put("versionName", getVersionName());
+		root.put("versionName", getVersionName().get());
 
 		Gson gson = new Gson();
 		@SuppressWarnings("unchecked")
