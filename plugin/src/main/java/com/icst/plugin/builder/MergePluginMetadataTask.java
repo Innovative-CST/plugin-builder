@@ -50,7 +50,11 @@ public abstract class MergePluginMetadataTask extends DefaultTask {
 		List<JsonElement> variants = new ArrayList<>();
 
 		if (dir.exists()) {
-			collectJsonFiles(dir, variants);
+			for (File file : dir.listFiles()) {
+				if (file.isDirectory()) {
+					collectJsonFiles(file, variants);
+				}
+			}
 		}
 
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
